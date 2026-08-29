@@ -1,5 +1,10 @@
-# PoinKa
-> Satu Hari Lebih Baik.
+<p align="center">
+  <img src="resources/images/icon-round.png" alt="PoinKa" width="120">
+</p>
+
+<h1 align="center">PoinKa</h1>
+
+<p align="center">Satu Hari Lebih Baik.</p>
 
 PoinKa adalah aplikasi web untuk mencatat waktu berangkat sekolah, mengelola poin, melihat statistik, dan mengatur hadiah untuk anak.
 
