@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anak;
 use App\Models\KalenderSekolah;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KalenderSekolahController extends Controller
 {
@@ -23,10 +25,25 @@ class KalenderSekolahController extends Controller
             return back()->withErrors(['date' => 'Tanggal khusus tidak boleh berada di masa lalu.']);
         }
 
-        $request->user()->kalenderSekolah()->updateOrCreate(
-            ['date' => $data['date']],
-            ['type' => $data['type'], 'description' => $data['description'] ?? null],
-        );
+        $today = CarbonImmutable::now($timezone)->toDateString();
+        $locked = DB::transaction(function () use ($request, $data, $today): bool {
+            $anak = Anak::query()->where('user_id', $request->user()->id)->lockForUpdate()->firstOrFail();
+
+            if ($data['date'] === $today && $anak->catatanBerangkat()->whereDate('tanggal_berangkat', $today)->exists()) {
+                return false;
+            }
+
+            $request->user()->kalenderSekolah()->updateOrCreate(
+                ['date' => $data['date']],
+                ['type' => $data['type'], 'description' => $data['description'] ?? null],
+            );
+
+            return true;
+        });
+
+        if (! $locked) {
+            return back()->withErrors(['date' => 'Tanggal khusus hari ini tidak dapat diubah setelah catatan keberangkatan dibuat.']);
+        }
 
         return back()->with('success', 'Tanggal khusus berhasil disimpan.');
     }
@@ -39,7 +56,22 @@ class KalenderSekolahController extends Controller
         if ($kalenderSekolah->date->isBefore(CarbonImmutable::now($timezone)->startOfDay())) {
             return back()->withErrors(['date' => 'Tanggal khusus yang sudah lewat tidak dapat diubah.']);
         }
-        $kalenderSekolah->delete();
+        $today = CarbonImmutable::now($timezone)->toDateString();
+        $locked = DB::transaction(function () use ($request, $kalenderSekolah, $today): bool {
+            $anak = Anak::query()->where('user_id', $request->user()->id)->lockForUpdate()->firstOrFail();
+
+            if ($kalenderSekolah->date->toDateString() === $today && $anak->catatanBerangkat()->whereDate('tanggal_berangkat', $today)->exists()) {
+                return false;
+            }
+
+            KalenderSekolah::query()->lockForUpdate()->findOrFail($kalenderSekolah->id)->delete();
+
+            return true;
+        });
+
+        if (! $locked) {
+            return back()->withErrors(['date' => 'Tanggal khusus hari ini tidak dapat diubah setelah catatan keberangkatan dibuat.']);
+        }
 
         return back()->with('success', 'Tanggal khusus dihapus.');
     }

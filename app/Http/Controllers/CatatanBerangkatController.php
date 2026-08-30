@@ -75,22 +75,24 @@ class CatatanBerangkatController extends Controller
             return back()->withErrors(['tanggal_berangkat' => 'Tanggal catatan tidak boleh setelah hari ini.']);
         }
 
-        $konfigurasiTanggal = $snapshotPengaturan->untukTanggal($user, $tanggal);
-        $hariSekolah = $konfigurasiTanggal['school_days'];
-        $adaPengecualian = $user->kalenderSekolah()->whereDate('date', $tanggal->toDateString())->exists();
-
-        if ($adaPengecualian || ! \in_array($tanggal->dayOfWeekIso, array_map('intval', $hariSekolah), true)) {
-            return back()->withErrors(['tanggal_berangkat' => 'Tanggal tersebut bukan hari sekolah sesuai pengaturan.']);
-        }
-
         $createdAt = CarbonImmutable::createFromFormat('Y-m-d H:i', $data['tanggal_berangkat'].' '.$data['jam_berangkat'], $timezone);
 
-        DB::transaction(function () use ($data, $anak, $createdAt, $konfigurasiTanggal, $layananPoin): void {
+        DB::transaction(function () use ($data, $anak, $createdAt, $layananPoin, $snapshotPengaturan, $tanggal, $user): void {
             $anak = Anak::query()->lockForUpdate()->findOrFail($anak->id);
 
             if ($anak->catatanBerangkat()->whereDate('tanggal_berangkat', $data['tanggal_berangkat'])->exists()) {
                 throw ValidationException::withMessages([
                     'tanggal_berangkat' => 'Tanggal itu sudah memiliki catatan. Gunakan Edit untuk memperbaiki jamnya.',
+                ]);
+            }
+
+            $konfigurasiTanggal = $snapshotPengaturan->untukTanggal($user, $tanggal);
+            $hariSekolah = $konfigurasiTanggal['school_days'];
+            $adaPengecualian = $user->kalenderSekolah()->whereDate('date', $tanggal->toDateString())->exists();
+
+            if ($adaPengecualian || ! \in_array($tanggal->dayOfWeekIso, array_map('intval', $hariSekolah), true)) {
+                throw ValidationException::withMessages([
+                    'tanggal_berangkat' => 'Tanggal tersebut bukan hari sekolah sesuai pengaturan.',
                 ]);
             }
 

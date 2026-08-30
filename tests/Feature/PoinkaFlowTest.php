@@ -394,6 +394,39 @@ class PoinkaFlowTest extends TestCase
             ->where('pointRules.0.cutoffTime', '06:25'));
     }
 
+    public function test_today_calendar_exception_cannot_change_after_a_record_exists(): void
+    {
+        [$user, $anak] = $this->makeChildWithRules();
+        $today = CarbonImmutable::now('Asia/Jakarta')->toDateString();
+        $anak->catatanBerangkat()->create([
+            'tanggal_berangkat' => $today,
+            'jam_berangkat' => '06:10:00',
+            'sumber' => 'manual',
+            'target_tepat_waktu_saat_dicatat' => '06:30:00',
+            'poin_didapat' => 3,
+        ]);
+        $exception = $user->kalenderSekolah()->create(['date' => $today, 'type' => 'libur']);
+
+        $this->actingAs($user)
+            ->from('/pengaturan')
+            ->post('/kalender-sekolah', [
+                'date' => $today,
+                'type' => 'tidak_ada_sekolah',
+            ])
+            ->assertRedirect('/pengaturan')
+            ->assertSessionHasErrors('date');
+
+        $this->assertSame('libur', $exception->fresh()->type);
+
+        $this->actingAs($user)
+            ->from('/pengaturan')
+            ->delete('/kalender-sekolah/'.$exception->id)
+            ->assertRedirect('/pengaturan')
+            ->assertSessionHasErrors('date');
+
+        $this->assertDatabaseHas('kalender_sekolah', ['id' => $exception->id]);
+    }
+
     public function test_home_target_reward_includes_its_image_url(): void
     {
         [$user] = $this->makeChildWithRules();
