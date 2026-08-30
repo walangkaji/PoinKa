@@ -149,6 +149,31 @@ export default function Pengaturan({
     const [activeRuleIndex, setActiveRuleIndex] = useState(null);
     const [ruleDraft, setRuleDraft] = useState(null);
     const [ruleTimePickerOpen, setRuleTimePickerOpen] = useState(false);
+    const [showStickySave, setShowStickySave] = useState(false);
+    const saveButtonRef = useRef(null);
+
+    useEffect(() => {
+        const button = saveButtonRef.current;
+
+        if (!form.isDirty || !button) {
+            setShowStickySave(false);
+            return undefined;
+        }
+
+        if (!('IntersectionObserver' in window)) {
+            setShowStickySave(true);
+            return undefined;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => setShowStickySave(!entry.isIntersecting),
+            { threshold: 0.1 },
+        );
+
+        observer.observe(button);
+
+        return () => observer.disconnect();
+    }, [form.isDirty]);
 
     useEffect(() => {
         if (activeRuleIndex === null) {
@@ -655,6 +680,7 @@ export default function Pengaturan({
                     {form.isDirty && (
                         <div className="order-5 mt-5 flex justify-center">
                             <button
+                                ref={saveButtonRef}
                                 type="button"
                                 onClick={submitSettings}
                                 disabled={form.processing}
@@ -780,6 +806,18 @@ export default function Pengaturan({
                         Keluar Dari Akun
                     </button>
                 </section>
+                {form.isDirty && showStickySave && (
+                    <div className="fixed inset-x-4 bottom-24 z-10 flex justify-center sm:bottom-6">
+                        <button
+                            type="button"
+                            onClick={submitSettings}
+                            disabled={form.processing}
+                            className="flex min-h-12 items-center gap-2 rounded-2xl bg-[#17342d] px-5 text-sm font-bold text-white shadow-[0_18px_45px_rgba(23,52,45,0.22)] transition-transform active:scale-[0.985] disabled:opacity-60">
+                            <Check size={17} weight="bold" />
+                            {form.processing ? 'Menyimpan...' : 'Simpan Pengaturan'}
+                        </button>
+                    </div>
+                )}
             </div>
         </ProductShell>
     );
