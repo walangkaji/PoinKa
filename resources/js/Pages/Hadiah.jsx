@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    ArrowCounterClockwise,
     ArrowUpRight,
     DotsThreeVertical,
     Gift,
@@ -258,6 +257,38 @@ function RedemptionPagination({ pagination }) {
     );
 }
 
+function RewardProgress({ reward, balance }) {
+    const collectedPoints = Math.min(Math.max(balance, 0), reward.cost);
+    const remainingPoints = Math.max(reward.cost - balance, 0);
+    const progressPercent = Math.min(Math.max((balance / reward.cost) * 100, 0), 100);
+    const canRedeem = balance >= reward.cost;
+
+    return (
+        <div className="mt-2.5 max-w-64">
+            <div className="flex items-center justify-between gap-3 text-[11px] leading-4">
+                <span className="font-semibold text-[#527268]">
+                    {collectedPoints} / {reward.cost} poin
+                </span>
+                <span className={canRedeem ? 'font-bold text-[#3d8a70]' : 'text-[#789088]'}>
+                    {canRedeem ? 'Bisa ditukar' : `Kurang ${remainingPoints} poin`}
+                </span>
+            </div>
+            <div
+                className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#dfe8df]"
+                role="progressbar"
+                aria-label={`Progress hadiah ${reward.name}`}
+                aria-valuemin="0"
+                aria-valuemax={reward.cost}
+                aria-valuenow={collectedPoints}>
+                <div
+                    className="h-full rounded-full bg-[#3d8a70] transition-[width] duration-500 ease-out"
+                    style={{ width: `${progressPercent}%` }}
+                />
+            </div>
+        </div>
+    );
+}
+
 export default function Hadiah({
     balance,
     rewards,
@@ -498,6 +529,7 @@ export default function Hadiah({
                                         <span className="font-bold">{reward.cost}</span> poin
                                         {reward.isTarget ? ' · Target utama' : ''}
                                     </p>
+                                    <RewardProgress reward={reward} balance={balance} />
                                 </div>
                                 <RewardActions
                                     reward={reward}
@@ -516,14 +548,14 @@ export default function Hadiah({
                 <section className="mt-5 rounded-[2rem] bg-white/85 p-6 ring-1 ring-[#e1e8e1] sm:p-8">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#edf0e9] text-[#3d8a70]">
-                            <ArrowCounterClockwise size={21} weight="duotone" />
+                            <Trophy size={21} weight="duotone" />
                         </span>
                         <div>
                             <h2 className="text-xl font-semibold tracking-[-0.04em]">
-                                Penukaran terbaru
+                                Riwayat pencapaian
                             </h2>
                             <p className="mt-1 text-sm text-[#789088]">
-                                Batalkan penukaran yang masih aktif.
+                                Hadiah yang ditukar dan status pencapaiannya tercatat di sini.
                             </p>
                         </div>
                     </div>
@@ -543,18 +575,18 @@ export default function Hadiah({
                                         {redemption.date} · {redemption.time} · {redemption.cost}{' '}
                                         poin
                                     </p>
+                                    <p
+                                        className={`mt-1 text-xs font-semibold ${redemption.status === 'active' ? 'text-[#3d8a70]' : 'text-[#8ca198]'}`}>
+                                        {redemption.status === 'active' ? 'Tercapai' : 'Dibatalkan'}
+                                    </p>
                                 </div>
-                                {redemption.status === 'active' ? (
+                                {redemption.status === 'active' && (
                                     <button
                                         type="button"
                                         onClick={() => cancelRedemption(redemption)}
                                         className="min-h-10 shrink-0 rounded-xl px-3 text-xs font-bold text-[#a3622e] ring-1 ring-[#e1cfc3] transition-colors hover:bg-[#f5e4d8]">
                                         Batalkan
                                     </button>
-                                ) : (
-                                    <span className="shrink-0 text-xs font-semibold text-[#8ca198]">
-                                        Dibatalkan
-                                    </span>
                                 )}
                             </div>
                         ))}
