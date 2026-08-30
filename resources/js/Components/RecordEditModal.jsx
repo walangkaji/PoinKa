@@ -57,7 +57,7 @@ export default function RecordEditModal({ open, record, form, onClose, onSubmit 
         <div
             className="fixed inset-0 z-[60] flex items-center justify-center bg-[#17342d]/35 px-4 py-6 backdrop-blur-[2px] motion-safe:animate-[poinka-modal-backdrop-in_220ms_ease-out_both] sm:p-6"
             role="presentation"
-            onClick={(event) => {
+            onMouseDown={(event) => {
                 if (event.target === event.currentTarget && !form.processing && !timePickerOpen)
                     onClose();
             }}>

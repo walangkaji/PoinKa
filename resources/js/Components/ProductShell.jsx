@@ -1,4 +1,5 @@
 import iconMark from '../../images/icon.png';
+import { ArrowLeft } from '@phosphor-icons/react';
 import { Head, Link } from '@inertiajs/react';
 import BottomNav from './BottomNav';
 import BrandWordmark from './BrandWordmark';
@@ -11,6 +12,7 @@ export default function ProductShell({
     active = 'beranda',
     flash,
     error,
+    centeredHeader = false,
     children,
 }) {
     return (
@@ -18,31 +20,52 @@ export default function ProductShell({
             <Head title={title} />
             <Toast message={flash?.success} />
             <Toast message={error} tone="error" />
-            <header className="mx-auto flex w-full max-w-3xl items-center justify-between py-6 sm:py-8">
-                <Link href="/" className="flex items-center gap-3">
-                    <img
-                        src={iconMark}
-                        alt=""
-                        aria-hidden="true"
-                        className="h-10 w-10 rounded-2xl object-cover"
-                    />
-                    <span>
-                        <BrandWordmark className="block text-[15px] font-bold" />
-                        <span className="block text-[10px] font-medium tracking-[0.04em] text-[#7b9288]">
-                            Satu Hari Lebih Baik.
-                        </span>
-                    </span>
-                </Link>
-                <ShortcutMenu />
+            <header
+                className={`mx-auto flex w-full max-w-3xl items-center ${centeredHeader ? 'relative justify-center py-4 sm:py-5' : 'justify-between py-6 sm:py-8'}`}>
+                {centeredHeader ? (
+                    <>
+                        <Link
+                            href="/"
+                            aria-label="Kembali ke beranda"
+                            className="absolute left-0 flex h-11 w-11 items-center justify-center rounded-full text-[#16463e] transition-[background-color,transform] duration-300 hover:bg-white/70 active:scale-[0.96]">
+                            <ArrowLeft size={28} weight="regular" />
+                        </Link>
+                        <h1 className="text-[24px] font-bold tracking-[-0.055em] text-[#123f37]">
+                            {title}
+                        </h1>
+                    </>
+                ) : (
+                    <>
+                        <Link href="/" className="flex items-center gap-3">
+                            <img
+                                src={iconMark}
+                                alt=""
+                                aria-hidden="true"
+                                className="h-10 w-10 rounded-2xl object-cover"
+                            />
+                            <span>
+                                <BrandWordmark className="block text-[15px] font-bold" />
+                                <span className="block text-[10px] font-medium tracking-[0.04em] text-[#7b9288]">
+                                    Satu Hari Lebih Baik.
+                                </span>
+                            </span>
+                        </Link>
+                        <ShortcutMenu />
+                    </>
+                )}
             </header>
             <main className="mx-auto w-full max-w-3xl">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#3d8a70]">
-                    {eyebrow}
-                </p>
-                <h1 className="mt-3 text-4xl font-semibold leading-none tracking-[-0.07em]">
-                    {title}
-                </h1>
-                <div className="mt-8">{children}</div>
+                {!centeredHeader && (
+                    <>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#3d8a70]">
+                            {eyebrow}
+                        </p>
+                        <h1 className="mt-3 text-4xl font-semibold leading-none tracking-[-0.07em]">
+                            {title}
+                        </h1>
+                    </>
+                )}
+                <div className={centeredHeader ? 'mt-0' : 'mt-8'}>{children}</div>
             </main>
             <BottomNav active={active} />
         </div>

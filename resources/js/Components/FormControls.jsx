@@ -17,6 +17,11 @@ const dateFormatter = new Intl.DateTimeFormat('id-ID', {
     month: 'long',
     year: 'numeric',
 });
+const shortDateFormatter = new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+});
 
 export function getTodayKey() {
     const today = new Date();
@@ -247,6 +252,246 @@ export function DatePicker({ label, value, onChange, error, min, max, optional =
             {error && (
                 <span className="mt-2 block text-xs font-medium text-[#a3622e]">{error}</span>
             )}
+        </div>
+    );
+}
+
+export function DateRangePicker({ label, from, to, onChange, optional = false }) {
+    const popover = useDismissablePopover();
+    const [viewDate, setViewDate] = useState(
+        () => parseDateKey(from) || parseDateKey(to) || new Date(),
+    );
+    const [draftFrom, setDraftFrom] = useState(from || '');
+    const [draftTo, setDraftTo] = useState(to || '');
+
+    useEffect(() => {
+        if (!popover.open) {
+            setDraftFrom(from || '');
+            setDraftTo(to || '');
+        }
+    }, [from, to, popover.open]);
+
+    const calendarDays = useMemo(() => {
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        const leadingEmptyDays = (new Date(year, month, 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const cellCount = Math.ceil((leadingEmptyDays + daysInMonth) / 7) * 7;
+
+        return Array.from({ length: cellCount }, (_, index) => {
+            const day = index - leadingEmptyDays + 1;
+
+            if (day < 1 || day > daysInMonth) return null;
+
+            const date = new Date(year, month, day);
+
+            return { key: formatDateKey(date), day };
+        });
+    }, [viewDate]);
+
+    function openPicker() {
+        setDraftFrom(from || '');
+        setDraftTo(to || '');
+        setViewDate(parseDateKey(from) || parseDateKey(to) || new Date());
+        popover.setOpen(true);
+    }
+
+    function selectDate(dateKey) {
+        if (!draftFrom || draftTo) {
+            setDraftFrom(dateKey);
+            setDraftTo('');
+            return;
+        }
+
+        if (dateKey < draftFrom) {
+            setDraftFrom(dateKey);
+            return;
+        }
+
+        setDraftTo(dateKey);
+    }
+
+    function applyRange() {
+        if (!draftFrom || !draftTo) return;
+
+        onChange({ from: draftFrom, to: draftTo });
+        popover.setOpen(false);
+    }
+
+    function clearRange() {
+        setDraftFrom('');
+        setDraftTo('');
+        onChange({ from: null, to: null });
+        popover.setOpen(false);
+    }
+
+    function cancelPicker() {
+        setDraftFrom(from || '');
+        setDraftTo(to || '');
+        popover.setOpen(false);
+    }
+
+    const rangeLabel =
+        from && to
+            ? `${shortDateFormatter.format(parseDateKey(from))} - ${shortDateFormatter.format(parseDateKey(to))}`
+            : from
+              ? `Mulai ${shortDateFormatter.format(parseDateKey(from))}`
+              : to
+                ? `Sampai ${shortDateFormatter.format(parseDateKey(to))}`
+                : 'Pilih rentang tanggal';
+
+    return (
+        <div className="block">
+            <span className="text-sm font-semibold text-[#31554a]">
+                {label}
+                {optional && <span className="font-normal text-[#8ca198]"> (opsional)</span>}
+            </span>
+            <div className="relative mt-2" ref={popover.rootRef}>
+                <button
+                    type="button"
+                    aria-label={label}
+                    aria-haspopup="dialog"
+                    aria-expanded={popover.open}
+                    onClick={openPicker}
+                    className="flex min-h-14 w-full items-center gap-3 rounded-2xl bg-[#f5f2ec] px-4 text-left text-base text-[#17342d] outline-none ring-1 ring-[#e1e8e1] transition-[box-shadow,background-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-[#edf0e9] focus:ring-2 focus:ring-[#3d8a70]">
+                    <CalendarDots size={20} weight="duotone" className="shrink-0 text-[#3d8a70]" />
+                    <span className={from || to ? '' : 'text-[#9aaba3]'}>{rangeLabel}</span>
+                    <CaretDown
+                        size={18}
+                        weight="bold"
+                        className={`ml-auto shrink-0 text-[#527268] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${popover.open ? 'rotate-180' : ''}`}
+                    />
+                </button>
+                {popover.open && (
+                    <div
+                        className="fixed inset-0 z-[60] flex items-center justify-center bg-[#17342d]/50 px-4 py-6 backdrop-blur-sm motion-safe:animate-[poinka-modal-backdrop-in_220ms_ease-out_both] sm:p-6"
+                        role="presentation"
+                        onMouseDown={(event) => {
+                            if (event.target === event.currentTarget) cancelPicker();
+                        }}>
+                        <section
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label={`Pilih ${label.toLowerCase()}`}
+                            className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-[2rem] bg-white p-4 shadow-[0_24px_70px_rgba(23,52,45,0.22)] ring-1 ring-[#e1e8e1] motion-safe:animate-[poinka-modal-in_420ms_cubic-bezier(0.32,0.72,0,1)_both] sm:p-5"
+                            onMouseDown={(event) => event.stopPropagation()}>
+                            <div className="flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8ca198]">
+                                        Atur rentang
+                                    </p>
+                                    <h2 className="mt-1 text-xl font-semibold tracking-[-0.04em] text-[#17342d]">
+                                        {label}
+                                    </h2>
+                                    <p className="mt-1 text-xs text-[#789088]">
+                                        {draftFrom && !draftTo
+                                            ? 'Pilih tanggal akhir'
+                                            : 'Pilih tanggal mulai dan akhir'}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={cancelPicker}
+                                    aria-label="Tutup pilihan rentang tanggal"
+                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#789088] transition-colors hover:bg-[#f5f2ec] focus:outline-none focus:ring-2 focus:ring-[#3d8a70]">
+                                    <X size={19} weight="bold" />
+                                </button>
+                            </div>
+                            <div className="mt-5 flex items-center justify-between gap-3">
+                                <button
+                                    type="button"
+                                    aria-label="Bulan sebelumnya"
+                                    onClick={() =>
+                                        setViewDate(
+                                            (current) =>
+                                                new Date(
+                                                    current.getFullYear(),
+                                                    current.getMonth() - 1,
+                                                    1,
+                                                ),
+                                        )
+                                    }
+                                    className="flex h-10 w-10 items-center justify-center rounded-xl text-[#527268] transition-colors hover:bg-[#edf0e9]">
+                                    <CaretLeft size={18} weight="bold" />
+                                </button>
+                                <p className="text-sm font-bold capitalize text-[#31554a]">
+                                    {monthFormatter.format(viewDate)}
+                                </p>
+                                <button
+                                    type="button"
+                                    aria-label="Bulan berikutnya"
+                                    onClick={() =>
+                                        setViewDate(
+                                            (current) =>
+                                                new Date(
+                                                    current.getFullYear(),
+                                                    current.getMonth() + 1,
+                                                    1,
+                                                ),
+                                        )
+                                    }
+                                    className="flex h-10 w-10 items-center justify-center rounded-xl text-[#527268] transition-colors hover:bg-[#edf0e9]">
+                                    <CaretRight size={18} weight="bold" />
+                                </button>
+                            </div>
+                            <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[9px] font-bold text-[#789088]">
+                                {weekDays.map((day) => (
+                                    <span key={day}>{day}</span>
+                                ))}
+                            </div>
+                            <div className="mt-2 grid grid-cols-7 gap-1">
+                                {calendarDays.map((day, index) => {
+                                    if (!day) {
+                                        return <span aria-hidden="true" key={`empty-${index}`} />;
+                                    }
+
+                                    const isStart = day.key === draftFrom;
+                                    const isEnd = day.key === draftTo;
+                                    const isInRange =
+                                        draftFrom &&
+                                        draftTo &&
+                                        day.key > draftFrom &&
+                                        day.key < draftTo;
+
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={day.key}
+                                            aria-pressed={isStart || isEnd}
+                                            onClick={() => selectDate(day.key)}
+                                            className={`h-10 rounded-xl text-xs font-semibold transition-colors ${isStart || isEnd ? 'bg-[#3d8a70] text-white' : isInRange ? 'bg-[#dfe9df] text-[#31554a]' : 'text-[#31554a] hover:bg-[#edf0e9]'}`}>
+                                            {day.day}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {optional && (from || to || draftFrom || draftTo) && (
+                                <button
+                                    type="button"
+                                    onClick={clearRange}
+                                    className="mt-3 min-h-10 w-full rounded-xl text-xs font-bold text-[#a3622e] transition-colors hover:bg-[#f5e4d8]">
+                                    Hapus Pilihan
+                                </button>
+                            )}
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={cancelPicker}
+                                    className="min-h-11 rounded-xl bg-[#f5f2ec] px-4 text-sm font-bold text-[#31554a] transition-colors hover:bg-[#edf0e9]">
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={applyRange}
+                                    disabled={!draftFrom || !draftTo}
+                                    className="min-h-11 rounded-xl bg-[#17342d] px-4 text-sm font-bold text-white transition-colors hover:bg-[#285249] disabled:cursor-not-allowed disabled:opacity-50">
+                                    Terapkan
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -525,6 +770,10 @@ export function TimePicker({
     }
 
     useEffect(() => {
+        if (withinModal) onOpenChange?.(popover.open);
+    }, [withinModal, popover.open, onOpenChange]);
+
+    useEffect(() => {
         if (!popover.open) return undefined;
 
         const frame = requestAnimationFrame(() => {
@@ -593,8 +842,9 @@ export function TimePicker({
                             withinModal
                                 ? (event) => {
                                       event.stopPropagation();
-                                      if (event.target === event.currentTarget)
+                                      if (event.target === event.currentTarget) {
                                           setPickerOpen(false);
+                                      }
                                   }
                                 : undefined
                         }>

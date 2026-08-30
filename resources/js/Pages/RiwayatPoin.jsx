@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, ClockCounterClockwise, Coins, Funnel, X } from '@phosphor-icons/react';
 import { Link, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import { DatePicker, SelectMenu } from '../Components/FormControls';
+import { DateRangePicker, SelectMenu } from '../Components/FormControls';
 import ProductShell from '../Components/ProductShell';
 import { useMemo } from 'react';
 
@@ -142,7 +142,7 @@ export default function RiwayatPoin({ balance, transactions, filters, pagination
                     </div>
                 </div>
                 <form className="mt-5 space-y-4" onSubmit={(event) => event.preventDefault()}>
-                    <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2">
                         <div>
                             <span className="text-sm font-semibold text-[#31554a]">
                                 Jenis aktivitas
@@ -155,19 +155,15 @@ export default function RiwayatPoin({ balance, transactions, filters, pagination
                                 ariaLabel="Pilih jenis aktivitas"
                             />
                         </div>
-                        <DatePicker
-                            label="Dari tanggal"
+                        <DateRangePicker
+                            label="Rentang tanggal"
                             optional
-                            value={form.from || ''}
-                            max={form.to || undefined}
-                            onChange={(value) => update('from', value || null)}
-                        />
-                        <DatePicker
-                            label="Sampai tanggal"
-                            optional
-                            value={form.to || ''}
-                            min={form.from || undefined}
-                            onChange={(value) => update('to', value || null)}
+                            from={form.from || ''}
+                            to={form.to || ''}
+                            onChange={({ from, to }) => {
+                                update('from', from);
+                                update('to', to);
+                            }}
                         />
                     </div>
                     {invalidRange && (
