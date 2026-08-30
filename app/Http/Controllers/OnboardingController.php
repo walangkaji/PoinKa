@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\LayananSnapshotPengaturan;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,8 @@ class OnboardingController extends Controller
         $user = $request->user();
 
         DB::transaction(function () use ($data, $user, $snapshotPengaturan): void {
+            $user = User::query()->lockForUpdate()->findOrFail($user->id);
+
             if ($user->anak()->exists()) {
                 return;
             }

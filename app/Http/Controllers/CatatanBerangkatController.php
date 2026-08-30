@@ -69,6 +69,7 @@ class CatatanBerangkatController extends Controller
         abort_unless($anak, 404);
 
         $timezone = $user->timezone ?: config('app.timezone');
+        $now = CarbonImmutable::now($timezone);
         $tanggal = CarbonImmutable::parse($data['tanggal_berangkat'], $timezone);
 
         if ($tanggal->isFuture()) {
@@ -76,6 +77,10 @@ class CatatanBerangkatController extends Controller
         }
 
         $createdAt = CarbonImmutable::createFromFormat('Y-m-d H:i', $data['tanggal_berangkat'].' '.$data['jam_berangkat'], $timezone);
+
+        if ($tanggal->isSameDay($now) && $createdAt->isFuture()) {
+            return back()->withErrors(['jam_berangkat' => 'Jam keberangkatan hari ini tidak boleh melewati waktu sekarang.']);
+        }
 
         DB::transaction(function () use ($data, $anak, $createdAt, $layananPoin, $snapshotPengaturan, $tanggal, $user): void {
             $anak = Anak::query()->lockForUpdate()->findOrFail($anak->id);

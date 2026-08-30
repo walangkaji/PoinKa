@@ -108,6 +108,27 @@ class PoinkaFlowTest extends TestCase
         $this->assertDatabaseCount('aturan_poin', 0);
     }
 
+    public function test_repeated_onboarding_submission_keeps_the_existing_setup(): void
+    {
+        $user = User::factory()->create();
+        $firstSetup = [
+            'child_name' => 'Shaka',
+            'on_time_target' => '06:30',
+            'school_days' => [1, 2, 3, 4, 5],
+        ];
+
+        $this->actingAs($user)->post('/mulai', $firstSetup)->assertRedirect('/');
+        $this->actingAs($user)->post('/mulai', [
+            ...$firstSetup,
+            'child_name' => 'Nama lain',
+        ])->assertRedirect('/');
+
+        $this->assertDatabaseCount('anak', 1);
+        $this->assertDatabaseCount('pengaturan', 1);
+        $this->assertDatabaseCount('aturan_poin', 3);
+        $this->assertSame('Shaka', $user->anak()->sole()->name);
+    }
+
     public function test_parent_can_request_a_password_reset_link(): void
     {
         Notification::fake();
@@ -207,6 +228,21 @@ class PoinkaFlowTest extends TestCase
 
         $this->assertDatabaseCount('catatan_berangkat', 0);
         $this->assertDatabaseCount('transaksi_poin', 0);
+    }
+
+    public function test_manual_record_rejects_a_future_time_today(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-31 06:00:00', 'Asia/Jakarta'));
+        [$user] = $this->makeChildWithRules();
+
+        $this->actingAs($user)->from('/catatan')->post('/catatan', [
+            'tanggal_berangkat' => '2026-08-31',
+            'jam_berangkat' => '06:01',
+        ])->assertRedirect('/catatan')->assertSessionHasErrors('jam_berangkat');
+
+        $this->assertDatabaseCount('catatan_berangkat', 0);
+        $this->assertDatabaseCount('transaksi_poin', 0);
+        CarbonImmutable::setTestNow();
     }
 
     public function test_manual_record_correction_preserves_point_history(): void
