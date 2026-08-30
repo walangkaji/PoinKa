@@ -164,101 +164,109 @@ export default function RewardFormModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="reward-form-title"
-                className="w-full max-w-md rounded-[2rem] bg-white p-5 text-[#17342d] shadow-[0_24px_70px_rgba(23,52,45,0.22)] ring-1 ring-[#e1e8e1] motion-safe:animate-[poinka-modal-in_420ms_cubic-bezier(0.32,0.72,0,1)_both] sm:p-6"
+                className="flex max-h-[calc(100dvh-3rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] bg-white text-[#17342d] shadow-[0_24px_70px_rgba(23,52,45,0.22)] ring-1 ring-[#e1e8e1] motion-safe:animate-[poinka-modal-in_420ms_cubic-bezier(0.32,0.72,0,1)_both]"
                 onMouseDown={(event) => event.stopPropagation()}>
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#edf0e9] text-[#3d8a70]">
-                            <Gift size={23} weight="duotone" />
-                        </span>
-                        <div>
-                            <h2
-                                id="reward-form-title"
-                                className="text-xl font-semibold tracking-[-0.04em]">
-                                {editing ? 'Edit hadiah' : 'Tambah hadiah'}
-                            </h2>
-                            <p className="mt-1 text-sm text-[#789088]">
-                                {editing
-                                    ? 'Perbarui informasi hadiah.'
-                                    : 'Buat hadiah baru untuk daftar pilihan.'}
-                            </p>
+                <div className="shrink-0 bg-white px-5 pb-3 pt-5 shadow-[0_8px_14px_-14px_rgba(23,52,45,0.45)] sm:px-6 sm:pt-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#edf0e9] text-[#3d8a70]">
+                                <Gift size={23} weight="duotone" />
+                            </span>
+                            <div>
+                                <h2
+                                    id="reward-form-title"
+                                    className="text-xl font-semibold tracking-[-0.04em]">
+                                    {editing ? 'Edit hadiah' : 'Tambah hadiah'}
+                                </h2>
+                                <p className="mt-1 text-sm text-[#789088]">
+                                    {editing
+                                        ? 'Perbarui informasi hadiah.'
+                                        : 'Buat hadiah baru untuk daftar pilihan.'}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            ref={closeButtonRef}
+                            onClick={onClose}
+                            disabled={form.processing}
+                            aria-label="Tutup formulir hadiah"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#789088] transition-colors hover:bg-[#f5f2ec] disabled:cursor-not-allowed disabled:opacity-50">
+                            <X size={19} weight="bold" />
+                        </button>
+                    </div>
+                </div>
+                <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={onSubmit}>
+                    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:px-6">
+                        <div className="space-y-4 pb-5 pt-6 sm:pb-6 sm:pt-6">
+                            <Field
+                                label="Nama hadiah"
+                                value={form.data.name}
+                                onChange={(event) => form.setData('name', event.target.value)}
+                                error={form.errors.name}
+                                autoComplete="off"
+                            />
+                            <Field
+                                label="Deskripsi singkat"
+                                value={form.data.description}
+                                onChange={(event) =>
+                                    form.setData('description', event.target.value)
+                                }
+                                error={form.errors.description}
+                                placeholder="Opsional"
+                            />
+                            <Field
+                                label="Harga dalam poin"
+                                value={form.data.poin_cost}
+                                onChange={(event) =>
+                                    form.setData('poin_cost', event.target.value.replace(/\D/g, ''))
+                                }
+                                error={form.errors.poin_cost}
+                                inputMode="numeric"
+                            />
+                            <RewardEstimate
+                                cost={form.data.poin_cost}
+                                pointRules={pointRules}
+                                settings={settings}
+                            />
+                            <label className="block">
+                                <span className="text-sm font-semibold text-[#31554a]">
+                                    Foto hadiah{' '}
+                                    <span className="font-normal text-[#8ca198]">(opsional)</span>
+                                </span>
+                                <span className="mt-2 flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-[#f5f2ec] px-4 text-sm text-[#789088] ring-1 ring-[#e1e8e1]">
+                                    <ImageSquare
+                                        size={20}
+                                        weight="duotone"
+                                        className="shrink-0 text-[#3d8a70]"
+                                    />
+                                    <span className="min-w-0 flex-1 truncate">
+                                        {form.data.image?.name ||
+                                            (existingImageUrl
+                                                ? 'Foto tersimpan · pilih untuk mengganti'
+                                                : 'Pilih foto')}
+                                    </span>
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        className="sr-only"
+                                        onChange={(event) =>
+                                            form.setData('image', event.target.files?.[0] ?? null)
+                                        }
+                                    />
+                                </span>
+                                {form.errors.image && (
+                                    <span className="mt-2 block text-xs font-medium text-[#a3622e]">
+                                        {form.errors.image}
+                                    </span>
+                                )}
+                                <span className="mt-2 block text-xs text-[#8ca198]">
+                                    JPG, PNG, atau WebP · maksimal 2 MB.
+                                </span>
+                            </label>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        ref={closeButtonRef}
-                        onClick={onClose}
-                        disabled={form.processing}
-                        aria-label="Tutup formulir hadiah"
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#789088] transition-colors hover:bg-[#f5f2ec] disabled:cursor-not-allowed disabled:opacity-50">
-                        <X size={19} weight="bold" />
-                    </button>
-                </div>
-                <form noValidate className="mt-6 space-y-4" onSubmit={onSubmit}>
-                    <Field
-                        label="Nama hadiah"
-                        value={form.data.name}
-                        onChange={(event) => form.setData('name', event.target.value)}
-                        error={form.errors.name}
-                        autoComplete="off"
-                    />
-                    <Field
-                        label="Deskripsi singkat"
-                        value={form.data.description}
-                        onChange={(event) => form.setData('description', event.target.value)}
-                        error={form.errors.description}
-                        placeholder="Opsional"
-                    />
-                    <Field
-                        label="Harga dalam poin"
-                        value={form.data.poin_cost}
-                        onChange={(event) =>
-                            form.setData('poin_cost', event.target.value.replace(/\D/g, ''))
-                        }
-                        error={form.errors.poin_cost}
-                        inputMode="numeric"
-                    />
-                    <RewardEstimate
-                        cost={form.data.poin_cost}
-                        pointRules={pointRules}
-                        settings={settings}
-                    />
-                    <label className="block">
-                        <span className="text-sm font-semibold text-[#31554a]">
-                            Foto hadiah{' '}
-                            <span className="font-normal text-[#8ca198]">(opsional)</span>
-                        </span>
-                        <span className="mt-2 flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-[#f5f2ec] px-4 text-sm text-[#789088] ring-1 ring-[#e1e8e1]">
-                            <ImageSquare
-                                size={20}
-                                weight="duotone"
-                                className="shrink-0 text-[#3d8a70]"
-                            />
-                            <span className="min-w-0 flex-1 truncate">
-                                {form.data.image?.name ||
-                                    (existingImageUrl
-                                        ? 'Foto tersimpan · pilih untuk mengganti'
-                                        : 'Pilih foto')}
-                            </span>
-                            <input
-                                type="file"
-                                accept="image/jpeg,image/png,image/webp"
-                                className="sr-only"
-                                onChange={(event) =>
-                                    form.setData('image', event.target.files?.[0] ?? null)
-                                }
-                            />
-                        </span>
-                        {form.errors.image && (
-                            <span className="mt-2 block text-xs font-medium text-[#a3622e]">
-                                {form.errors.image}
-                            </span>
-                        )}
-                        <span className="mt-2 block text-xs text-[#8ca198]">
-                            JPG, PNG, atau WebP · maksimal 2 MB.
-                        </span>
-                    </label>
-                    <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="shrink-0 grid grid-cols-2 gap-3 border-t border-[#edf0e9] bg-white px-5 pb-5 pt-3 shadow-[0_-8px_14px_-14px_rgba(23,52,45,0.45)] sm:px-6 sm:pb-6">
                         <button
                             type="button"
                             onClick={onClose}
