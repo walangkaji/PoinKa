@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function (): void {
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('settings.update');
     Route::post('/profil-anak', [ProfilAnakController::class, 'update'])->name('child-profile.update');
     Route::post('/penyesuaian-poin', [PenyesuaianPoinController::class, 'store'])->name('points.adjust');
+    Route::post('/penyesuaian-poin/{transaksiPoin}/batal', [PenyesuaianPoinController::class, 'cancel'])->name('points.adjustment.cancel');
     Route::post('/kalender-sekolah', [KalenderSekolahController::class, 'store'])->name('calendar.store');
     Route::delete('/kalender-sekolah/{kalenderSekolah}', [KalenderSekolahController::class, 'destroy'])->name('calendar.destroy');
 });

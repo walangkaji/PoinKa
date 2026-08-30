@@ -1,95 +1,103 @@
 {
-  "_ArrowUp.es-RIINtwV_.js": {
-    "file": "assets/ArrowUp.es-RIINtwV_.js",
+  "_ArrowUp.es-CkwuEsB7.js": {
+    "file": "assets/ArrowUp.es-CkwuEsB7.js",
     "name": "ArrowUp.es",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_AuthShell-NSaIuEJ9.js": {
-    "file": "assets/AuthShell-NSaIuEJ9.js",
+  "_AuthShell-D6sWmETY.js": {
+    "file": "assets/AuthShell-D6sWmETY.js",
     "name": "AuthShell",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_ConfirmDialog-D0ogFRVG.js": {
-    "file": "assets/ConfirmDialog-D0ogFRVG.js",
+  "_ConfirmDialog-CIKLdGQU.js": {
+    "file": "assets/ConfirmDialog-CIKLdGQU.js",
     "name": "ConfirmDialog",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_FormControls-Dbkg8Dad.js"
+      "_Toast-DGji1Jn4.js",
+      "_FormControls-CP1hS6DF.js"
     ]
   },
-  "_FormControls-Dbkg8Dad.js": {
-    "file": "assets/FormControls-Dbkg8Dad.js",
+  "_FormControls-CP1hS6DF.js": {
+    "file": "assets/FormControls-CP1hS6DF.js",
     "name": "FormControls",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_Medal.es-DQLupxa9.js": {
-    "file": "assets/Medal.es-DQLupxa9.js",
+  "_Medal.es-Bjk3xc6n.js": {
+    "file": "assets/Medal.es-Bjk3xc6n.js",
     "name": "Medal.es",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_PencilSimple.es-GeW8ZXNP.js": {
-    "file": "assets/PencilSimple.es-GeW8ZXNP.js",
+  "_PencilSimple.es-DZafXcv6.js": {
+    "file": "assets/PencilSimple.es-DZafXcv6.js",
     "name": "PencilSimple.es",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_Plus.es-BubKJ8gG.js": {
-    "file": "assets/Plus.es-BubKJ8gG.js",
+  "_Plus.es-DgpH3sX5.js": {
+    "file": "assets/Plus.es-DgpH3sX5.js",
     "name": "Plus.es",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_ProductShell-CYgRuKJ8.js": {
-    "file": "assets/ProductShell-CYgRuKJ8.js",
+  "_ProductShell-TspIXssm.js": {
+    "file": "assets/ProductShell-TspIXssm.js",
     "name": "ProductShell",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ShortcutMenu-CdYd1_he.js"
+      "_Toast-DGji1Jn4.js",
+      "_ShortcutMenu-L5_opgiL.js"
     ]
   },
-  "_ShortcutMenu-CdYd1_he.js": {
-    "file": "assets/ShortcutMenu-CdYd1_he.js",
+  "_ShortcutMenu-L5_opgiL.js": {
+    "file": "assets/ShortcutMenu-L5_opgiL.js",
     "name": "ShortcutMenu",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_FormControls-Dbkg8Dad.js"
+      "_Toast-DGji1Jn4.js",
+      "_FormControls-CP1hS6DF.js"
     ]
   },
-  "_Target.es-B2DOFeAV.js": {
-    "file": "assets/Target.es-B2DOFeAV.js",
+  "_Target.es-C_nHkCWD.js": {
+    "file": "assets/Target.es-C_nHkCWD.js",
     "name": "Target.es",
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js"
+      "_Toast-DGji1Jn4.js"
     ]
   },
-  "_Toast-D8wMBqpV.js": {
-    "file": "assets/Toast-D8wMBqpV.js",
+  "_Toast-DGji1Jn4.js": {
+    "file": "assets/Toast-DGji1Jn4.js",
     "name": "Toast",
     "imports": [
       "resources/js/app.jsx"
     ],
     "assets": [
       "assets/icon-BSNd2Xif.png"
+    ]
+  },
+  "_Trash.es-Z5ZVm06a.js": {
+    "file": "assets/Trash.es-Z5ZVm06a.js",
+    "name": "Trash.es",
+    "imports": [
+      "resources/js/app.jsx",
+      "_Toast-DGji1Jn4.js"
     ]
   },
   "_fonts-C9MNnjVw.css": {
@@ -121,7 +129,7 @@
     "src": "_instrument-sans-600-normal-B9e8oLYv.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-1VDhM1Vv.css",
+    "file": "assets/app-DgGlKz_z.css",
     "name": "app",
     "names": [
       "app.css"
@@ -138,146 +146,149 @@
     "src": "resources/images/icon.png"
   },
   "resources/js/Pages/Auth/ForgotPassword.jsx": {
-    "file": "assets/ForgotPassword-C2ybqbSr.js",
+    "file": "assets/ForgotPassword-DDnUw02y.js",
     "name": "ForgotPassword",
     "src": "resources/js/Pages/Auth/ForgotPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthShell-NSaIuEJ9.js"
+      "_AuthShell-D6sWmETY.js"
     ]
   },
   "resources/js/Pages/Auth/Login.jsx": {
-    "file": "assets/Login-Bpc2Pl_f.js",
+    "file": "assets/Login-D4OMsBAu.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthShell-NSaIuEJ9.js"
+      "_AuthShell-D6sWmETY.js"
     ]
   },
   "resources/js/Pages/Auth/Register.jsx": {
-    "file": "assets/Register-C1PRxIXV.js",
+    "file": "assets/Register-Bw30g6hx.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthShell-NSaIuEJ9.js"
+      "_AuthShell-D6sWmETY.js"
     ]
   },
   "resources/js/Pages/Auth/ResetPassword.jsx": {
-    "file": "assets/ResetPassword-F2hTTpsn.js",
+    "file": "assets/ResetPassword-CNaJJhEI.js",
     "name": "ResetPassword",
     "src": "resources/js/Pages/Auth/ResetPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AuthShell-NSaIuEJ9.js"
+      "_AuthShell-D6sWmETY.js"
     ]
   },
   "resources/js/Pages/Catatan.jsx": {
-    "file": "assets/Catatan-DueFHioF.js",
+    "file": "assets/Catatan-C5uqzfpX.js",
     "name": "Catatan",
     "src": "resources/js/Pages/Catatan.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ProductShell-CYgRuKJ8.js",
-      "_FormControls-Dbkg8Dad.js",
-      "_PencilSimple.es-GeW8ZXNP.js",
-      "_Plus.es-BubKJ8gG.js"
+      "_Toast-DGji1Jn4.js",
+      "_ProductShell-TspIXssm.js",
+      "_FormControls-CP1hS6DF.js",
+      "_PencilSimple.es-DZafXcv6.js",
+      "_Plus.es-DgpH3sX5.js"
     ]
   },
   "resources/js/Pages/Hadiah.jsx": {
-    "file": "assets/Hadiah-BYB4n4mQ.js",
+    "file": "assets/Hadiah-D_2gGlRq.js",
     "name": "Hadiah",
     "src": "resources/js/Pages/Hadiah.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ProductShell-CYgRuKJ8.js",
-      "_ShortcutMenu-CdYd1_he.js",
-      "_FormControls-Dbkg8Dad.js",
-      "_ConfirmDialog-D0ogFRVG.js",
-      "_PencilSimple.es-GeW8ZXNP.js",
-      "_Plus.es-BubKJ8gG.js",
-      "_Target.es-B2DOFeAV.js"
+      "_Toast-DGji1Jn4.js",
+      "_ProductShell-TspIXssm.js",
+      "_ShortcutMenu-L5_opgiL.js",
+      "_FormControls-CP1hS6DF.js",
+      "_Trash.es-Z5ZVm06a.js",
+      "_PencilSimple.es-DZafXcv6.js",
+      "_Plus.es-DgpH3sX5.js",
+      "_Target.es-C_nHkCWD.js",
+      "_ConfirmDialog-CIKLdGQU.js"
     ]
   },
   "resources/js/Pages/Home.jsx": {
-    "file": "assets/Home-B7GmXxix.js",
+    "file": "assets/Home-CUyua9I_.js",
     "name": "Home",
     "src": "resources/js/Pages/Home.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ShortcutMenu-CdYd1_he.js",
-      "_FormControls-Dbkg8Dad.js",
-      "_Medal.es-DQLupxa9.js",
-      "_Target.es-B2DOFeAV.js"
+      "_Toast-DGji1Jn4.js",
+      "_ShortcutMenu-L5_opgiL.js",
+      "_FormControls-CP1hS6DF.js",
+      "_Medal.es-Bjk3xc6n.js",
+      "_Target.es-C_nHkCWD.js"
     ]
   },
   "resources/js/Pages/Onboarding.jsx": {
-    "file": "assets/Onboarding-B-AfQ19t.js",
+    "file": "assets/Onboarding-l2VK7Amd.js",
     "name": "Onboarding",
     "src": "resources/js/Pages/Onboarding.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_FormControls-Dbkg8Dad.js",
-      "_AuthShell-NSaIuEJ9.js"
+      "_FormControls-CP1hS6DF.js",
+      "_AuthShell-D6sWmETY.js"
     ]
   },
   "resources/js/Pages/Pengaturan.jsx": {
-    "file": "assets/Pengaturan-CJmscLCu.js",
+    "file": "assets/Pengaturan-ComkoM0_.js",
     "name": "Pengaturan",
     "src": "resources/js/Pages/Pengaturan.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ProductShell-CYgRuKJ8.js",
-      "_ShortcutMenu-CdYd1_he.js",
-      "_FormControls-Dbkg8Dad.js",
-      "_ConfirmDialog-D0ogFRVG.js",
-      "_Plus.es-BubKJ8gG.js"
+      "_Toast-DGji1Jn4.js",
+      "_ProductShell-TspIXssm.js",
+      "_ShortcutMenu-L5_opgiL.js",
+      "_FormControls-CP1hS6DF.js",
+      "_Trash.es-Z5ZVm06a.js",
+      "_Plus.es-DgpH3sX5.js",
+      "_ConfirmDialog-CIKLdGQU.js"
     ]
   },
   "resources/js/Pages/RiwayatPoin.jsx": {
-    "file": "assets/RiwayatPoin-BJs1GKS3.js",
+    "file": "assets/RiwayatPoin-Bb1Q01ty.js",
     "name": "RiwayatPoin",
     "src": "resources/js/Pages/RiwayatPoin.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_Toast-D8wMBqpV.js",
-      "_ArrowUp.es-RIINtwV_.js",
-      "_ProductShell-CYgRuKJ8.js",
-      "_FormControls-Dbkg8Dad.js"
+      "_Toast-DGji1Jn4.js",
+      "_ArrowUp.es-CkwuEsB7.js",
+      "_ProductShell-TspIXssm.js",
+      "_FormControls-CP1hS6DF.js",
+      "_ConfirmDialog-CIKLdGQU.js"
     ]
   },
   "resources/js/Pages/Statistik.jsx": {
-    "file": "assets/Statistik-CWX-YMdw.js",
+    "file": "assets/Statistik-BkvjVLx-.js",
     "name": "Statistik",
     "src": "resources/js/Pages/Statistik.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_ArrowUp.es-RIINtwV_.js",
-      "_ProductShell-CYgRuKJ8.js",
-      "_ShortcutMenu-CdYd1_he.js",
-      "_FormControls-Dbkg8Dad.js",
-      "_Medal.es-DQLupxa9.js",
-      "_Target.es-B2DOFeAV.js"
+      "_ArrowUp.es-CkwuEsB7.js",
+      "_ProductShell-TspIXssm.js",
+      "_ShortcutMenu-L5_opgiL.js",
+      "_FormControls-CP1hS6DF.js",
+      "_Medal.es-Bjk3xc6n.js",
+      "_Target.es-C_nHkCWD.js"
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-_ZawMFLm.js",
+    "file": "assets/app-VyaCGdRE.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -295,7 +306,7 @@
       "resources/js/Pages/Statistik.jsx"
     ],
     "css": [
-      "assets/app-1VDhM1Vv.css"
+      "assets/app-DgGlKz_z.css"
     ],
     "assets": [
       "assets/favicon-DGcq7TLK.ico"

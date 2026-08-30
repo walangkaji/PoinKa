@@ -23,7 +23,7 @@ class RiwayatPoinController extends Controller
         $bonus->proses($anak);
 
         $validator = Validator::make($request->all(), [
-            'type' => ['nullable', 'in:all,poin_waktu_berangkat,bonus_mingguan,penyesuaian_manual,penyesuaian_bonus_mingguan,penukaran_hadiah,pembatalan_penukaran'],
+            'type' => ['nullable', 'in:all,poin_waktu_berangkat,bonus_mingguan,penyesuaian_manual,pembatalan_penyesuaian,penyesuaian_bonus_mingguan,penukaran_hadiah,pembatalan_penukaran'],
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to'   => ['nullable', 'date_format:Y-m-d'],
         ]);
@@ -58,13 +58,22 @@ class RiwayatPoinController extends Controller
             $query->whereDate('created_at', '<=', $filters['to']);
         }
 
-        $transactions    = $query->paginate(10)->withQueryString();
-        $transactionData = $transactions->getCollection()->map(function (TransaksiPoin $transaction) use ($balanceAfter, $timezone): array {
+        $transactions = $query->paginate(10)->withQueryString();
+        $manualAdjustmentIds = $transactions->getCollection()->where('type', 'penyesuaian_manual')->pluck('id');
+        $cancelledAdjustmentIds = $manualAdjustmentIds->isEmpty()
+            ? collect()
+            : $anak->transaksiPoin()
+                ->where('type', 'pembatalan_penyesuaian')
+                ->where('reference_type', TransaksiPoin::class)
+                ->whereIn('reference_id', $manualAdjustmentIds)
+                ->pluck('reference_id');
+        $transactionData = $transactions->getCollection()->map(function (TransaksiPoin $transaction) use ($balanceAfter, $cancelledAdjustmentIds, $timezone): array {
             $title = match ($transaction->type) {
                 'poin_waktu_berangkat'       => 'Poin waktu berangkat',
                 'bonus_mingguan'             => 'Bonus konsisten',
                 'penyesuaian_bonus_mingguan' => 'Penyesuaian bonus mingguan',
                 'penyesuaian_manual'         => 'Penyesuaian poin',
+                'pembatalan_penyesuaian'     => 'Pembatalan penyesuaian',
                 'penukaran_hadiah'           => 'Penukaran hadiah',
                 'pembatalan_penukaran'       => 'Pembatalan penukaran',
                 default                      => 'Perubahan saldo',
@@ -79,6 +88,9 @@ class RiwayatPoinController extends Controller
                 'time'         => $transaction->created_at->copy()->setTimezone($timezone)->format('H:i'),
                 'amount'       => $transaction->amount,
                 'balanceAfter' => $balanceAfter[$transaction->id] ?? 0,
+                'canCancel'    => 'penyesuaian_manual' === $transaction->type
+                    && null === $transaction->reference_type
+                    && ! $cancelledAdjustmentIds->contains($transaction->id),
             ];
         })->values()->all();
 

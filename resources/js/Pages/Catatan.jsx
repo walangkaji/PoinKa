@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, PencilSimple, Plus, PlusMinus } from '@phosphor-icons/react';
+import { Clock, Minus, PencilSimple, Plus, PlusMinus } from '@phosphor-icons/react';
 import { Link, useForm } from '@inertiajs/react';
 import { DatePicker, TimePicker } from '../Components/FormControls';
 import ProductShell from '../Components/ProductShell';
@@ -94,6 +94,12 @@ export default function Catatan({ records, target, balance, flash, pagination, t
         });
     }
 
+    function changeAdjustmentAmount(delta) {
+        const currentAmount = Number.parseInt(adjustForm.data.amount, 10) || 0;
+
+        adjustForm.setData('amount', String(currentAmount + delta));
+    }
+
     return (
         <ProductShell
             active={null}
@@ -161,14 +167,31 @@ export default function Catatan({ records, target, balance, flash, pagination, t
                     </div>
                 </div>
                 <form noValidate className="mt-6 space-y-4" onSubmit={submitAdjustment}>
-                    <input
-                        type="text"
-                        inputMode="text"
-                        placeholder="Jumlah, contoh +5 atau -2"
-                        value={adjustForm.data.amount}
-                        onChange={(event) => adjustForm.setData('amount', event.target.value)}
-                        className="block h-14 w-full rounded-2xl bg-[#f5f2ec] px-4 py-0 text-base leading-[3.5rem] text-[#17342d] outline-none ring-1 ring-[#edc778] focus:ring-2 focus:ring-[#17342d]"
-                    />
+                    <div className="flex h-14 w-full items-center overflow-hidden rounded-2xl bg-[#f5f2ec] ring-1 ring-[#edc778] focus-within:ring-2 focus-within:ring-[#17342d]">
+                        <button
+                            type="button"
+                            aria-label="Kurangi 1 poin"
+                            onClick={() => changeAdjustmentAmount(-1)}
+                            className="flex h-full w-14 shrink-0 items-center justify-center text-[#8a552c] transition-colors hover:bg-[#f0dfbf] active:bg-[#e9d3a8]">
+                            <Minus size={19} weight="bold" />
+                        </button>
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            step="1"
+                            placeholder="Jumlah poin"
+                            value={adjustForm.data.amount}
+                            onChange={(event) => adjustForm.setData('amount', event.target.value)}
+                            className="h-full min-w-0 flex-1 bg-transparent px-2 py-0 text-center text-base text-[#17342d] outline-none"
+                        />
+                        <button
+                            type="button"
+                            aria-label="Tambah 1 poin"
+                            onClick={() => changeAdjustmentAmount(1)}
+                            className="flex h-full w-14 shrink-0 items-center justify-center text-[#8a552c] transition-colors hover:bg-[#f0dfbf] active:bg-[#e9d3a8]">
+                            <Plus size={19} weight="bold" />
+                        </button>
+                    </div>
                     {adjustForm.errors.amount && (
                         <p className="text-xs font-medium text-[#8a552c]">
                             {adjustForm.errors.amount}

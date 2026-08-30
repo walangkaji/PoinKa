@@ -708,6 +708,70 @@ class PoinkaFlowTest extends TestCase
         $this->assertSame(3, (int) $anak->transaksiPoin()->sum('amount'));
     }
 
+    public function test_parent_can_cancel_manual_adjustment_and_keep_audit_trail(): void
+    {
+        [$user, $anak] = $this->makeChildWithRules();
+
+        $this->actingAs($user)
+            ->from('/catatan')
+            ->post('/penyesuaian-poin', [
+                'amount'      => 5,
+                'description' => 'Koreksi saldo',
+            ])
+            ->assertRedirect('/catatan');
+
+        $adjustment = $anak->transaksiPoin()->where('type', 'penyesuaian_manual')->sole();
+
+        $this->actingAs($user)
+            ->from('/riwayat-poin')
+            ->post('/penyesuaian-poin/' . $adjustment->id . '/batal')
+            ->assertRedirect('/riwayat-poin');
+
+        $this->assertSame(0, (int) $anak->transaksiPoin()->sum('amount'));
+        $this->assertDatabaseHas('transaksi_poin', [
+            'type'           => 'pembatalan_penyesuaian',
+            'amount'         => -5,
+            'reference_type' => TransaksiPoin::class,
+            'reference_id'   => $adjustment->id,
+        ]);
+        $this->assertDatabaseCount('transaksi_poin', 2);
+
+        $this->actingAs($user)
+            ->post('/penyesuaian-poin/' . $adjustment->id . '/batal')
+            ->assertRedirect();
+        $this->assertDatabaseCount('transaksi_poin', 2);
+    }
+
+    public function test_manual_adjustment_cannot_be_cancelled_when_balance_would_turn_negative(): void
+    {
+        [$user, $anak] = $this->makeChildWithRules();
+
+        $this->actingAs($user)
+            ->from('/catatan')
+            ->post('/penyesuaian-poin', [
+                'amount'      => 5,
+                'description' => 'Koreksi saldo',
+            ])
+            ->assertRedirect('/catatan');
+
+        $adjustment = $anak->transaksiPoin()->where('type', 'penyesuaian_manual')->sole();
+        TransaksiPoin::query()->create([
+            'anak_id'      => $anak->id,
+            'type'         => 'bonus_manual',
+            'amount'       => -5,
+            'description' => 'Poin terpakai',
+        ]);
+
+        $this->actingAs($user)
+            ->from('/riwayat-poin')
+            ->post('/penyesuaian-poin/' . $adjustment->id . '/batal')
+            ->assertRedirect('/riwayat-poin')
+            ->assertSessionHasErrors('adjustment');
+
+        $this->assertSame(0, (int) $anak->transaksiPoin()->sum('amount'));
+        $this->assertDatabaseCount('transaksi_poin', 2);
+    }
+
     public function test_orphan_point_transaction_repair_only_removes_missing_record_references(): void
     {
         [$user, $anak] = $this->makeChildWithRules();

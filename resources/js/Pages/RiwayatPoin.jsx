@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, ClockCounterClockwise, Coins, Funnel, X } from '@phosphor-icons/react';
 import { Link, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import ConfirmDialog from '../Components/ConfirmDialog';
 import { DateRangePicker, SelectMenu } from '../Components/FormControls';
 import ProductShell from '../Components/ProductShell';
 import { useMemo } from 'react';
@@ -11,6 +12,7 @@ const typeOptions = [
     { value: 'bonus_mingguan', label: 'Bonus mingguan' },
     { value: 'penyesuaian_bonus_mingguan', label: 'Penyesuaian bonus mingguan' },
     { value: 'penyesuaian_manual', label: 'Penyesuaian poin' },
+    { value: 'pembatalan_penyesuaian', label: 'Pembatalan penyesuaian' },
     { value: 'penukaran_hadiah', label: 'Penukaran hadiah' },
     { value: 'pembatalan_penukaran', label: 'Pembatalan penukaran' },
 ];
@@ -71,8 +73,9 @@ function Pagination({ pagination, filters }) {
     );
 }
 
-export default function RiwayatPoin({ balance, transactions, filters, pagination }) {
+export default function RiwayatPoin({ balance, transactions, filters, pagination, flash, errors }) {
     const [form, setForm] = useState(filters);
+    const [confirmation, setConfirmation] = useState(null);
     const didMount = useRef(false);
     const skipNextAutoFilter = useRef(false);
     const hasFilters = Boolean((form.type && form.type !== 'all') || form.from || form.to);
@@ -111,8 +114,44 @@ export default function RiwayatPoin({ balance, transactions, filters, pagination
         router.get('/riwayat-poin', {}, { preserveScroll: true, preserveState: true });
     }
 
+    function requestCancel(transaction) {
+        const amount = (transaction.amount >= 0 ? '+' : '') + transaction.amount + ' poin';
+
+        setConfirmation({
+            title: 'Batalkan penyesuaian ini?',
+            message: 'Penyesuaian ' + amount + ' akan dikoreksi. Riwayat asli tetap tersimpan.',
+            confirmLabel: 'Batalkan',
+            tone: 'danger',
+            onConfirm: () => {
+                router.post(
+                    '/penyesuaian-poin/' + transaction.id + '/batal',
+                    {},
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => setConfirmation(null),
+                        onError: () => setConfirmation(null),
+                    },
+                );
+            },
+        });
+    }
+
     return (
-        <ProductShell active={null} eyebrow="Semua perubahan saldo" title="Riwayat poin">
+        <ProductShell
+            active={null}
+            eyebrow="Semua perubahan saldo"
+            title="Riwayat poin"
+            flash={flash}
+            error={errors?.adjustment}>
+            <ConfirmDialog
+                open={Boolean(confirmation)}
+                title={confirmation?.title}
+                message={confirmation?.message}
+                confirmLabel={confirmation?.confirmLabel}
+                tone={confirmation?.tone}
+                onConfirm={confirmation?.onConfirm}
+                onCancel={() => setConfirmation(null)}
+            />
             <section className="rounded-[2rem] bg-[#17342d] p-6 text-[#f5f2ec] shadow-[0_20px_50px_rgba(23,52,45,0.12)] sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                     <div>
@@ -237,14 +276,24 @@ export default function RiwayatPoin({ balance, transactions, filters, pagination
                                             </p>
                                         )}
                                     </div>
-                                    <div className="shrink-0 text-right">
-                                        <p className={amountClass}>
-                                            {isAdded ? '+' : ''}
-                                            {transaction.amount}
-                                        </p>
-                                        <p className="mt-1 text-[11px] font-medium text-[#8ca198]">
-                                            Saldo {transaction.balanceAfter}
-                                        </p>
+                                    <div className="flex shrink-0 flex-col items-end gap-2">
+                                        <div className="text-right">
+                                            <p className={amountClass}>
+                                                {isAdded ? '+' : ''}
+                                                {transaction.amount}
+                                            </p>
+                                            <p className="mt-1 text-[11px] font-medium text-[#8ca198]">
+                                                Saldo {transaction.balanceAfter}
+                                            </p>
+                                        </div>
+                                        {transaction.canCancel && (
+                                            <button
+                                                type="button"
+                                                onClick={() => requestCancel(transaction)}
+                                                className="min-h-9 rounded-xl px-2.5 text-[11px] font-bold text-[#a3622e] ring-1 ring-[#e1cfc3] transition-colors hover:bg-[#f5e4d8]">
+                                                Batalkan
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );
