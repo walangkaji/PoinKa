@@ -127,6 +127,7 @@ export default function Pengaturan({
     child,
     flash,
     today,
+    settingsEffectiveToday,
 }) {
     const form = useForm({
         on_time_target: settings.onTimeTarget,
@@ -151,6 +152,8 @@ export default function Pengaturan({
     const [ruleTimePickerOpen, setRuleTimePickerOpen] = useState(false);
     const [showStickySave, setShowStickySave] = useState(false);
     const saveButtonRef = useRef(null);
+    const ruleTimePickerOpenRef = useRef(ruleTimePickerOpen);
+    ruleTimePickerOpenRef.current = ruleTimePickerOpen;
 
     useEffect(() => {
         const button = saveButtonRef.current;
@@ -183,7 +186,7 @@ export default function Pengaturan({
 
         const previousOverflow = document.body.style.overflow;
         const handleKeyDown = (event) => {
-            if (event.key === 'Escape') setActiveRuleIndex(null);
+            if (event.key === 'Escape' && !ruleTimePickerOpenRef.current) setActiveRuleIndex(null);
         };
 
         document.body.style.overflow = 'hidden';
@@ -548,7 +551,9 @@ export default function Pengaturan({
                                     Aturan harian
                                 </h2>
                                 <p className="mt-1 text-sm text-[#789088]">
-                                    Perubahan ini dipakai untuk pencatatan berikutnya.
+                                    {settingsEffectiveToday
+                                        ? 'Belum ada catatan hari ini. Perubahan berlaku langsung.'
+                                        : 'Catatan hari ini sudah ada. Perubahan berlaku mulai besok.'}
                                 </p>
                             </div>
                         </div>

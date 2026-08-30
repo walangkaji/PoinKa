@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'array' => ':attribute harus berupa daftar.',
+    'boolean' => ':attribute harus bernilai ya atau tidak.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'date' => ':attribute harus berupa tanggal yang valid.',
+    'date_format' => ':attribute harus menggunakan format :format.',
+    'distinct' => ':attribute tidak boleh memiliki nilai yang sama.',
+    'email' => ':attribute harus berupa alamat email yang valid.',
+    'image' => ':attribute harus berupa gambar.',
+    'integer' => ':attribute harus berupa bilangan bulat.',
+    'max' => [
+        'array' => ':attribute tidak boleh memiliki lebih dari :max item.',
+        'file' => ':attribute tidak boleh lebih besar dari :max kilobita.',
+        'numeric' => ':attribute tidak boleh lebih dari :max.',
+        'string' => ':attribute tidak boleh lebih dari :max karakter.',
+    ],
+    'mimes' => ':attribute harus berupa file dengan format: :values.',
+    'min' => [
+        'array' => ':attribute harus memiliki setidaknya :min item.',
+        'numeric' => ':attribute harus minimal :min.',
+        'string' => ':attribute harus minimal :min karakter.',
+    ],
+    'not_in' => ':attribute tidak valid.',
+    'required' => ':attribute wajib diisi.',
+    'string' => ':attribute harus berupa teks.',
+    'unique' => ':attribute sudah digunakan.',
+
+    'attributes' => [
+        'amount' => 'jumlah poin',
+        'child_name' => 'nama anak',
+        'date' => 'tanggal',
+        'description' => 'keterangan',
+        'email' => 'email',
+        'image' => 'foto',
+        'jam_berangkat' => 'jam berangkat',
+        'name' => 'nama',
+        'on_time_target' => 'target tepat waktu',
+        'password' => 'kata sandi',
+        'poin_cost' => 'harga poin',
+        'rules' => 'aturan poin',
+        'school_days' => 'hari sekolah',
+        'tanggal_berangkat' => 'tanggal berangkat',
+    ],
+];

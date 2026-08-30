@@ -24,8 +24,10 @@ export default function RecordEditModal({ open, record, form, onClose, onSubmit 
     const onCloseRef = useRef(onClose);
     const processingRef = useRef(form.processing);
     const [timePickerOpen, setTimePickerOpen] = useState(false);
+    const timePickerOpenRef = useRef(timePickerOpen);
     onCloseRef.current = onClose;
     processingRef.current = form.processing;
+    timePickerOpenRef.current = timePickerOpen;
 
     useEffect(() => {
         if (!open) {
@@ -36,7 +38,8 @@ export default function RecordEditModal({ open, record, form, onClose, onSubmit 
         const previousActiveElement = document.activeElement;
         const previousScrollY = window.scrollY;
         const handleKeyDown = (event) => {
-            if (event.key === 'Escape' && !processingRef.current) onCloseRef.current();
+            if (event.key === 'Escape' && !processingRef.current && !timePickerOpenRef.current)
+                onCloseRef.current();
         };
 
         document.body.style.overflow = 'hidden';

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anak;
 use App\Services\LayananSnapshotPengaturan;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -27,35 +28,37 @@ class PengaturanController extends Controller
             ->orderBy('date')
             ->paginate(10, ['*'], 'calendar_page')
             ->withQueryString();
+        $hasTodayRecord = $user->anak->catatanBerangkat()->whereDate('tanggal_berangkat', $today)->exists();
 
         return Inertia::render('Pengaturan', [
             'settings' => [
-                'onTimeTarget'      => substr($user->pengaturan->on_time_target, 0, 5),
-                'schoolDays'        => $user->pengaturan->school_days,
+                'onTimeTarget' => substr($user->pengaturan->on_time_target, 0, 5),
+                'schoolDays' => $user->pengaturan->school_days,
                 'weeklyBonusActive' => $user->pengaturan->weekly_bonus_active,
-                'weeklyBonusName'   => $user->pengaturan->weekly_bonus_name,
-                'weeklyBonusDays'   => $user->pengaturan->weekly_bonus_days,
+                'weeklyBonusName' => $user->pengaturan->weekly_bonus_name,
+                'weeklyBonusDays' => $user->pengaturan->weekly_bonus_days,
                 'weeklyBonusPoints' => $user->pengaturan->weekly_bonus_points,
             ],
             'today' => $today,
+            'settingsEffectiveToday' => ! $hasTodayRecord,
             'child' => [
                 'name' => $user->anak->name,
             ],
             'rules' => $user->aturanPoin()->where('is_active', true)->orderBy('sort_order')->get()->map(fn ($rule): array => [
-                'id'         => $rule->id,
+                'id' => $rule->id,
                 'cutoffTime' => substr($rule->cutoff_time, 0, 5),
-                'points'     => $rule->poin,
+                'points' => $rule->poin,
             ])->values()->all(),
             'calendar' => $calendar->getCollection()->map(fn ($entry): array => [
-                'id'          => $entry->id,
-                'date'        => $entry->date->locale('id')->translatedFormat('l, d F Y'),
-                'type'        => $entry->type,
+                'id' => $entry->id,
+                'date' => $entry->date->locale('id')->translatedFormat('l, d F Y'),
+                'type' => $entry->type,
                 'description' => $entry->description,
             ])->values()->all(),
             'calendarPagination' => [
                 'currentPage' => $calendar->currentPage(),
-                'lastPage'    => $calendar->lastPage(),
-                'total'       => $calendar->total(),
+                'lastPage' => $calendar->lastPage(),
+                'total' => $calendar->total(),
             ],
         ]);
     }
@@ -63,18 +66,18 @@ class PengaturanController extends Controller
     public function update(Request $request, LayananSnapshotPengaturan $snapshotPengaturan): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'on_time_target'      => ['required', 'date_format:H:i'],
-            'school_days'         => ['required', 'array', 'min:1'],
-            'school_days.*'       => ['integer', 'between:1,7', 'distinct'],
-            'rules'               => ['required', 'array', 'min:1'],
-            'rules.*.id'          => ['nullable', 'integer'],
+            'on_time_target' => ['required', 'date_format:H:i'],
+            'school_days' => ['required', 'array', 'min:1'],
+            'school_days.*' => ['integer', 'between:1,7', 'distinct'],
+            'rules' => ['required', 'array', 'min:1'],
+            'rules.*.id' => ['nullable', 'integer'],
             'rules.*.cutoff_time' => ['required', 'date_format:H:i'],
-            'rules.*.points'      => ['required', 'integer', 'min:0'],
-            'removed_rule_ids'    => ['nullable', 'array'],
-            'removed_rule_ids.*'  => ['integer', 'distinct'],
+            'rules.*.points' => ['required', 'integer', 'min:0'],
+            'removed_rule_ids' => ['nullable', 'array'],
+            'removed_rule_ids.*' => ['integer', 'distinct'],
             'weekly_bonus_active' => ['sometimes', 'boolean'],
-            'weekly_bonus_name'   => ['sometimes', 'required', 'string', 'max:100'],
-            'weekly_bonus_days'   => ['sometimes', 'required', 'integer', 'min:1', 'max:7'],
+            'weekly_bonus_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'weekly_bonus_days' => ['sometimes', 'required', 'integer', 'min:1', 'max:7'],
             'weekly_bonus_points' => ['sometimes', 'required', 'integer', 'min:0'],
         ]);
         $validator->after(function ($validator) use ($request): void {
@@ -113,10 +116,16 @@ class PengaturanController extends Controller
         $data = $validator->validate();
         $user = $request->user();
 
-        DB::transaction(function () use ($data, $user, $snapshotPengaturan): void {
+        $berlakuHariIni = false;
+
+        DB::transaction(function () use ($data, $user, $snapshotPengaturan, &$berlakuHariIni): void {
+            $timezone = $user->timezone ?: config('app.timezone');
+            $today = CarbonImmutable::now($timezone)->startOfDay();
+            $anak = Anak::query()->where('user_id', $user->id)->lockForUpdate()->firstOrFail();
+            $berlakuHariIni = ! $anak->catatanBerangkat()->whereDate('tanggal_berangkat', $today->toDateString())->exists();
             $settings = [
-                'on_time_target' => $data['on_time_target'] . ':00',
-                'school_days'    => array_values(array_map('intval', $data['school_days'])),
+                'on_time_target' => $data['on_time_target'].':00',
+                'school_days' => array_values(array_map('intval', $data['school_days'])),
             ];
 
             if (\array_key_exists('weekly_bonus_active', $data)) {
@@ -146,24 +155,25 @@ class PengaturanController extends Controller
                 if ($rule) {
                     $rule->update([
                         'cutoff_time' => $ruleData['cutoff_time'],
-                        'poin'        => $ruleData['points'],
-                        'sort_order'  => $index + 1,
-                        'is_active'   => true,
+                        'poin' => $ruleData['points'],
+                        'sort_order' => $index + 1,
+                        'is_active' => true,
                     ]);
                 } else {
                     $user->aturanPoin()->create([
-                        'cutoff_time' => $ruleData['cutoff_time'] . ':00',
-                        'poin'        => $ruleData['points'],
-                        'sort_order'  => $index + 1,
-                        'is_active'   => true,
+                        'cutoff_time' => $ruleData['cutoff_time'].':00',
+                        'poin' => $ruleData['points'],
+                        'sort_order' => $index + 1,
+                        'is_active' => true,
                     ]);
                 }
             }
 
-            $timezone = $user->timezone ?: config('app.timezone');
-            $snapshotPengaturan->simpan($user, CarbonImmutable::now($timezone)->startOfDay());
+            $snapshotPengaturan->simpan($user, $berlakuHariIni ? $today : $today->addDay(), replace: true);
         });
 
-        return back()->with('success', 'Pengaturan berhasil disimpan.');
+        return back()->with('success', $berlakuHariIni
+            ? 'Pengaturan berhasil disimpan dan berlaku hari ini.'
+            : 'Pengaturan berhasil disimpan dan berlaku mulai besok.');
     }
 }

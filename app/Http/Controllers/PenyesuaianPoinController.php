@@ -13,7 +13,7 @@ class PenyesuaianPoinController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'amount'      => ['required', 'integer', 'not_in:0', 'between:-100000,100000'],
+            'amount' => ['required', 'integer', 'not_in:0', 'between:-100000,100000'],
             'description' => ['required', 'string', 'max:200'],
         ]);
         $anak = $request->user()->anak;
@@ -23,14 +23,16 @@ class PenyesuaianPoinController extends Controller
             $saldo = (int) $anak->transaksiPoin()->lockForUpdate()->sum('amount');
 
             if ($saldo + (int) $data['amount'] < 0) {
-                abort(422, 'Saldo tidak boleh menjadi negatif.');
+                throw ValidationException::withMessages([
+                    'amount' => 'Saldo tidak boleh menjadi negatif.',
+                ]);
             }
 
             TransaksiPoin::query()->create([
-                'anak_id'       => $anak->id,
-                'type'          => 'penyesuaian_manual',
-                'amount'        => (int) $data['amount'],
-                'description'   => $data['description'],
+                'anak_id' => $anak->id,
+                'type' => 'penyesuaian_manual',
+                'amount' => (int) $data['amount'],
+                'description' => $data['description'],
                 'metadata_json' => ['oleh' => 'orang_tua'],
             ]);
         });
@@ -41,11 +43,11 @@ class PenyesuaianPoinController extends Controller
     public function cancel(Request $request, TransaksiPoin $transaksiPoin): RedirectResponse
     {
         $anak = $request->user()->anak;
-        abort_unless($anak && $transaksiPoin->anak_id === $anak->id && 'penyesuaian_manual' === $transaksiPoin->type && null === $transaksiPoin->reference_type, 404);
+        abort_unless($anak && $transaksiPoin->anak_id === $anak->id && $transaksiPoin->type === 'penyesuaian_manual' && $transaksiPoin->reference_type === null, 404);
 
         $cancelled = DB::transaction(function () use ($anak, $transaksiPoin): bool {
             $adjustment = TransaksiPoin::query()->lockForUpdate()->findOrFail($transaksiPoin->id);
-            abort_unless($adjustment->anak_id === $anak->id && 'penyesuaian_manual' === $adjustment->type && null === $adjustment->reference_type, 404);
+            abort_unless($adjustment->anak_id === $anak->id && $adjustment->type === 'penyesuaian_manual' && $adjustment->reference_type === null, 404);
 
             $alreadyCancelled = TransaksiPoin::query()
                 ->where('anak_id', $anak->id)
@@ -59,7 +61,7 @@ class PenyesuaianPoinController extends Controller
             }
 
             $reversalAmount = -$adjustment->amount;
-            $saldo          = (int) $anak->transaksiPoin()->lockForUpdate()->sum('amount');
+            $saldo = (int) $anak->transaksiPoin()->lockForUpdate()->sum('amount');
 
             if ($saldo + $reversalAmount < 0) {
                 throw ValidationException::withMessages([
@@ -68,14 +70,14 @@ class PenyesuaianPoinController extends Controller
             }
 
             TransaksiPoin::query()->create([
-                'anak_id'        => $anak->id,
-                'type'           => 'pembatalan_penyesuaian',
-                'amount'         => $reversalAmount,
+                'anak_id' => $anak->id,
+                'type' => 'pembatalan_penyesuaian',
+                'amount' => $reversalAmount,
                 'reference_type' => TransaksiPoin::class,
-                'reference_id'   => $adjustment->id,
-                'description'    => 'Pembatalan penyesuaian: ' . $adjustment->description,
-                'metadata_json'  => [
-                    'oleh'                     => 'orang_tua',
+                'reference_id' => $adjustment->id,
+                'description' => 'Pembatalan penyesuaian: '.$adjustment->description,
+                'metadata_json' => [
+                    'oleh' => 'orang_tua',
                     'membatalkan_transaksi_id' => $adjustment->id,
                 ],
             ]);

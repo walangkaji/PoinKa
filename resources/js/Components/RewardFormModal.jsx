@@ -47,8 +47,11 @@ function RewardEstimate({ cost, pointRules, settings }) {
     if (!numericCost || numericCost < 1) return null;
 
     const schoolDaysPerWeek = Math.max(1, settings?.schoolDays?.length || 5);
+    const bonusCanEarn = Boolean(
+        settings?.weeklyBonusActive && Number(settings?.weeklyBonusPoints) > 0,
+    );
     const estimates = pointRules
-        .filter((rule) => Number(rule.points) > 0)
+        .filter((rule) => Number(rule.points) > 0 || bonusCanEarn)
         .map((rule) => ({
             ...rule,
             schoolDays: estimateSchoolDays(numericCost, Number(rule.points), settings),
