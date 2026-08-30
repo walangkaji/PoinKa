@@ -265,6 +265,8 @@ export default function Hadiah({
     redemptionPagination,
     flash,
     errors,
+    pointRules,
+    settings,
 }) {
     const form = useForm({ name: '', description: '', poin_cost: '', image: null });
     const formScrollPosition = React.useRef(null);
@@ -565,6 +567,8 @@ export default function Hadiah({
                 editing={Boolean(editingReward)}
                 existingImageUrl={editingReward?.imageUrl}
                 form={form}
+                pointRules={pointRules}
+                settings={settings}
                 onClose={closeForm}
                 onSubmit={submit}
             />

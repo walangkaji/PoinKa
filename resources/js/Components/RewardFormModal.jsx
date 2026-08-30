@@ -1,4 +1,4 @@
-import { Gift, ImageSquare, X } from '@phosphor-icons/react';
+import { ChartLineUp, Gift, ImageSquare, X } from '@phosphor-icons/react';
 import { useEffect, useRef } from 'react';
 
 function Field({ label, value, onChange, error, ...props }) {
@@ -18,11 +18,108 @@ function Field({ label, value, onChange, error, ...props }) {
     );
 }
 
+function estimateSchoolDays(cost, dailyPoints, settings) {
+    const schoolDaysPerWeek = Math.max(1, settings?.schoolDays?.length || 5);
+    const bonusDays = Math.max(1, Number(settings?.weeklyBonusDays) || schoolDaysPerWeek);
+    const bonusPoints = Math.max(0, Number(settings?.weeklyBonusPoints) || 0);
+    const bonusActive = Boolean(settings?.weeklyBonusActive && bonusPoints > 0);
+    let earnedPoints = 0;
+    let schoolDays = 0;
+    let daysThisWeek = 0;
+
+    while (earnedPoints < cost && schoolDays < 10000) {
+        earnedPoints += dailyPoints;
+        schoolDays += 1;
+        daysThisWeek += 1;
+
+        if (daysThisWeek === schoolDaysPerWeek) {
+            if (bonusActive && daysThisWeek >= bonusDays) earnedPoints += bonusPoints;
+            daysThisWeek = 0;
+        }
+    }
+
+    return schoolDays < 10000 ? schoolDays : null;
+}
+
+function RewardEstimate({ cost, pointRules, settings }) {
+    const numericCost = Number.parseInt(cost || '0', 10);
+
+    if (!numericCost || numericCost < 1) return null;
+
+    const schoolDaysPerWeek = Math.max(1, settings?.schoolDays?.length || 5);
+    const estimates = pointRules
+        .filter((rule) => Number(rule.points) > 0)
+        .map((rule) => ({
+            ...rule,
+            schoolDays: estimateSchoolDays(numericCost, Number(rule.points), settings),
+        }));
+
+    return (
+        <div className="rounded-[1.35rem] bg-[#eef4e9] px-4 py-3.5 text-[#39755f]">
+            <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/70 text-[#3d8a70]">
+                    <ChartLineUp size={19} weight="duotone" />
+                </span>
+                <div className="min-w-0">
+                    <p className="text-sm font-semibold">Estimasi pencapaian</p>
+                    <p className="mt-1 text-xs leading-5 text-[#6f837a]">
+                        Perkiraan dari 0 poin, tanpa menghitung saldo saat ini.
+                    </p>
+                </div>
+            </div>
+            {estimates.length > 0 ? (
+                <div className="mt-3 space-y-2">
+                    {estimates.map((rule) => (
+                        <div
+                            className="flex items-center justify-between gap-3 rounded-xl bg-white/65 px-3 py-2.5"
+                            key={`${rule.cutoffTime}-${rule.points}`}>
+                            <div className="min-w-0">
+                                <p className="text-xs font-semibold text-[#31554a]">
+                                    Sampai {rule.cutoffTime}
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-[#789088]">
+                                    +{rule.points} poin / hari sekolah
+                                </p>
+                            </div>
+                            <div className="shrink-0 text-right text-xs leading-4 font-bold text-[#286b50]">
+                                {rule.schoolDays ? (
+                                    <>
+                                        <span className="block">
+                                            {rule.schoolDays} hari sekolah
+                                        </span>
+                                        <span className="mt-0.5 block font-medium text-[#6f837a]">
+                                            sekitar {Math.ceil(rule.schoolDays / schoolDaysPerWeek)}{' '}
+                                            minggu
+                                        </span>
+                                    </>
+                                ) : (
+                                    'Belum dapat dicapai'
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="mt-3 text-xs font-semibold text-[#6f837a]">
+                    Belum dapat diperkirakan karena semua aturan bernilai 0 poin.
+                </p>
+            )}
+            {settings?.weeklyBonusActive && (
+                <p className="mt-3 text-[11px] leading-4 text-[#6f837a]">
+                    Estimasi sudah termasuk bonus mingguan jika target tepat waktu tercapai.
+                </p>
+            )}
+        </div>
+    );
+}
+
 export default function RewardFormModal({
     open,
     editing,
     form,
     existingImageUrl,
+    pointRules = [],
+    settings = {},
     onClose,
     onSubmit,
 }) {
@@ -117,6 +214,11 @@ export default function RewardFormModal({
                         }
                         error={form.errors.poin_cost}
                         inputMode="numeric"
+                    />
+                    <RewardEstimate
+                        cost={form.data.poin_cost}
+                        pointRules={pointRules}
+                        settings={settings}
                     />
                     <label className="block">
                         <span className="text-sm font-semibold text-[#31554a]">

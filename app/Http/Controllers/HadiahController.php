@@ -55,6 +55,16 @@ class HadiahController extends Controller
                 'cost'        => $reward->poin_cost,
                 'isTarget'    => $reward->is_target,
             ])->values()->all(),
+            'pointRules' => $request->user()->aturanPoin()->where('is_active', true)->orderBy('sort_order')->get()->map(fn ($rule): array => [
+                'cutoffTime' => substr($rule->cutoff_time, 0, 5),
+                'points'     => (int) $rule->poin,
+            ])->values()->all(),
+            'settings' => [
+                'schoolDays'        => $request->user()->pengaturan->school_days,
+                'weeklyBonusActive' => (bool) $request->user()->pengaturan->weekly_bonus_active,
+                'weeklyBonusDays'   => (int) $request->user()->pengaturan->weekly_bonus_days,
+                'weeklyBonusPoints' => (int) $request->user()->pengaturan->weekly_bonus_points,
+            ],
         ]);
     }
 
