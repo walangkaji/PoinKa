@@ -8,12 +8,15 @@ use App\Models\TransaksiPoin;
 use App\Services\LayananBonusMingguan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Intervention\Image\Format;
+use Intervention\Image\Laravel\Facades\Image;
 
 class HadiahController extends Controller
 {
@@ -87,7 +90,7 @@ class HadiahController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('rewards', 'public');
+            $data['image'] = $this->storeOptimizedImage($request->file('image'));
         }
 
         $request->user()->hadiah()->create($data + ['is_active' => true, 'is_target' => false]);
@@ -119,7 +122,7 @@ class HadiahController extends Controller
 
         if ($request->hasFile('image')) {
             $oldImage      = $hadiah->image;
-            $data['image'] = $request->file('image')->store('rewards', 'public');
+            $data['image'] = $this->storeOptimizedImage($request->file('image'));
             $hadiah->update($data);
 
             if ($oldImage) {
@@ -238,5 +241,17 @@ class HadiahController extends Controller
         });
 
         return back()->with('success', $cancelled ? 'Penukaran dibatalkan dan poin dikembalikan.' : 'Penukaran sudah dibatalkan sebelumnya.');
+    }
+
+    private function storeOptimizedImage(UploadedFile $image): string
+    {
+        $path = 'rewards/'.Str::uuid().'.webp';
+        $optimized = Image::decode($image)
+            ->scaleDown(width: 1200)
+            ->encodeUsingFormat(Format::WEBP, quality: 80);
+
+        Storage::disk('public')->put($path, $optimized);
+
+        return $path;
     }
 }

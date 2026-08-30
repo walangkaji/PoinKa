@@ -20,8 +20,10 @@ use Carbon\CarbonImmutable;
 use Database\Seeders\PoinkaDemoSeeder;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -504,6 +506,27 @@ class PoinkaFlowTest extends TestCase
         $this->assertDatabaseHas('transaksi_poin', ['amount' => -5, 'type' => 'penukaran_hadiah']);
         $this->assertDatabaseCount('penukaran_hadiah', 1);
         $this->assertSame(5, (int) $anak->transaksiPoin()->sum('amount'));
+    }
+
+    public function test_reward_images_are_resized_and_stored_as_webp(): void
+    {
+        Storage::fake('public');
+        [$user] = $this->makeChildWithRules();
+
+        $this->actingAs($user)->from('/hadiah')->post('/hadiah', [
+            'name' => 'Buku gambar',
+            'poin_cost' => 10,
+            'image' => UploadedFile::fake()->image('buku.jpg', 2400, 1600),
+        ])->assertRedirect('/hadiah');
+
+        $reward = Hadiah::query()->where('name', 'Buku Gambar')->firstOrFail();
+        $this->assertTrue(str_ends_with($reward->image, '.webp'));
+        Storage::disk('public')->assertExists($reward->image);
+
+        $image = getimagesizefromstring(Storage::disk('public')->get($reward->image));
+        $this->assertSame('image/webp', $image['mime']);
+        $this->assertSame(1200, $image[0]);
+        $this->assertSame(800, $image[1]);
     }
 
     public function test_reward_redemption_can_be_cancelled_and_points_are_returned(): void
